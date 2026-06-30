@@ -206,6 +206,10 @@ vagrant@ansible01:~/inventory$ cat playbook.yml
         name: nginx
         state: started
         enabled: yes
+      # Запустим playbook
+      vagrant@ansible01:~/inventory$ ansible-playbook playbook.yml -l nginx
+
+      
 
     - name: Restart Nginx
       systemd:
