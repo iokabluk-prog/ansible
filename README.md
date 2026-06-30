@@ -146,5 +146,70 @@ https://docs.ansible.com/ansible-
 core/2.17/reference_appendices/interpreter_discovery.html for more information.
 nginx | CHANGED | rc=0 >>
 5.15.0-181-generic
+# playbook
+vagrant@ansible01:~/inventory$ cat playbook.yml
+# playbook_simple.yml
+---
+- name: Deploy Nginx on Ubuntu
+  hosts: nginx
+  become: yes
+
+  vars:
+    nginx_port: 8080
+    nginx_user: www-data
+
+  tasks:
+    - name: Update apt and install Nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+      notify: Start Nginx
+
+    - name: Create web directory
+      file:
+        path: /var/www/html
+        state: directory
+        mode: '0755'
+
+    - name: Create test page
+      copy:
+        content: |
+          <h1>Nginx on Ubuntu!</h1>
+          <p>Port: {{ nginx_port }}</p>
+          <p>Host: {{ ansible_hostname }}</p>
+        dest: /var/www/html/index.html
+        mode: '0644'
+
+    - name: Deploy Nginx config
+      template:
+        src: templates/nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+        mode: '0644'
+      notify: Restart Nginx
+
+    - name: Remove default site
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      notify: Restart Nginx
+
+    - name: Enable and start Nginx
+      systemd:
+        name: nginx
+        enabled: yes
+        state: started
+
+  handlers:
+    - name: Start Nginx
+      systemd:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Restart Nginx
+      systemd:
+        name: nginx
+
 
 
