@@ -128,14 +128,15 @@ private_key_file = ~/.ssh/id_rsa
 # Изменим файл inventory.ini
 vagrant@ansible01:~/inventory$ cat inventory.ini
 [webservers]
-192.168.56.12
+nginx ansible_host=192.168.56.12
 # Проверим, что работает
- ansible 192.168.56.12 -m command -a uptime
-[WARNING]: Platform linux on host 192.168.56.12 is using the discovered Python
+vagrant@ansible01:~/inventory$ ansible nginx  -m command -a uptime
+[WARNING]: Platform linux on host nginx is using the discovered Python
 interpreter at /usr/bin/python3.10, but future installation of another Python
 interpreter could change the meaning of that path. See
 https://docs.ansible.com/ansible-
 core/2.17/reference_appendices/interpreter_discovery.html for more information.
-192.168.56.12 | CHANGED | rc=0 >>
- 20:00:26 up  5:02,  3 users,  load average: 0.00, 0.00, 0.00
+nginx | CHANGED | rc=0 >>
+ 20:06:26 up  5:08,  3 users,  load average: 0.01, 0.01, 0.00
+
 
