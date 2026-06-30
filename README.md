@@ -138,5 +138,13 @@ https://docs.ansible.com/ansible-
 core/2.17/reference_appendices/interpreter_discovery.html for more information.
 nginx | CHANGED | rc=0 >>
  20:06:26 up  5:08,  3 users,  load average: 0.01, 0.01, 0.00
+vagrant@ansible01:~/inventory$ ansible nginx  -m command -a "uname -r"
+[WARNING]: Platform linux on host nginx is using the discovered Python
+interpreter at /usr/bin/python3.10, but future installation of another Python
+interpreter could change the meaning of that path. See
+https://docs.ansible.com/ansible-
+core/2.17/reference_appendices/interpreter_discovery.html for more information.
+nginx | CHANGED | rc=0 >>
+5.15.0-181-generic
 
 
