@@ -219,6 +219,44 @@ vagrant@ansible01:~/inventory$ cat playbook.yml
       systemd:
         name: nginx
         state: restarted
+      # В директории ~/inventory/ создаем каталог templates и nginx.conf.j2
+      vagrant@ansible01:~/inventory/templates$ cat nginx.conf.j2
+user {{ nginx_user }};
+worker_processes {{ nginx_worker_processes }};
+pid /run/nginx.pid;
+
+events {
+    worker_connections {{ nginx_worker_connections }};
+    multi_accept on;
+    use epoll;
+}
+
+http {
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+    keepalive_timeout 65;
+    types_hash_max_size 2048;
+
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log;
+
+    server {
+        listen {{ nginx_port }};
+        server_name {{ server_name }};
+
+        root {{ nginx_root }};
+        index index.html index.htm;
+
+        location / {
+            try_files $uri $uri/ =404;
+        }
+    }
+}
+
       # Запустим playbook
       vagrant@ansible01:~/inventory$ ansible-playbook playbook.yml -l nginx
       # Проверка
