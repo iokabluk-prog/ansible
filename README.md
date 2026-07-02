@@ -257,9 +257,9 @@ http {
     }
 }
 
-      # Запустим playbook
+  # Запустим playbook
       vagrant@ansible01:~/inventory$ ansible-playbook playbook.yml -l nginx
-      # Проверка
+  # Проверка
       vagrant@ansible01:~/inventory$ curl http://192.168.56.12:8080
 <h1>Nginx on Ubuntu!</h1>
 <p>Port: 8080</p>
