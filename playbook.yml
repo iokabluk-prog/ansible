@@ -1,0 +1,71 @@
+# playbook_simple.yml
+---
+- name: Deploy Nginx on Ubuntu
+  hosts: nginx
+  become: yes
+
+  vars:
+    nginx_port: 8080
+    nginx_user: www-data
+    nginx_worker_processes: auto
+    nginx_worker_connections: 768
+    server_name: _
+    nginx_root: /var/www/html
+    nginx_log_dir: /var/log/nginx
+
+  tasks:
+    - name: Update apt and install Nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+      notify: Start Nginx
+
+    - name: Create web directory
+      file:
+        path: "{{ nginx_root }}"
+        state: directory
+        mode: '0755'
+
+    - name: Create test page
+      copy:
+        content: |
+          <h1>Nginx on Ubuntu!</h1>
+          <p>Port: {{ nginx_port }}</p>
+          <p>Host: {{ ansible_hostname }}</p>
+          <p>Root: {{ nginx_root }}</p>
+        dest: "{{ nginx_root }}/index.html"
+        mode: '0644'
+
+    - name: Deploy Nginx configuration from template
+      template:
+        src: "{{ playbook_dir }}/templates/nginx.conf.j2"
+        dest: /etc/nginx/nginx.conf
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Restart Nginx
+
+    - name: Remove default site
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      notify: Restart Nginx
+
+    - name: Enable and start Nginx
+      systemd:
+        name: nginx
+        enabled: yes
+        state: started
+
+  handlers:
+    - name: Start Nginx
+      systemd:
+        name: nginx
+        state: started
+        enabled: yes
+    
+    - name: Restart Nginx
+      systemd:
+        name: nginx
+        state: restarted
