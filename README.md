@@ -157,6 +157,11 @@ vagrant@ansible01:~/inventory$ cat playbook.yml
   vars:
     nginx_port: 8080
     nginx_user: www-data
+    nginx_worker_processes: auto
+    nginx_worker_connections: 768
+    server_name: _
+    nginx_root: /var/www/html
+    nginx_log_dir: /var/log/nginx
 
   tasks:
     - name: Update apt and install Nginx
@@ -168,7 +173,7 @@ vagrant@ansible01:~/inventory$ cat playbook.yml
 
     - name: Create web directory
       file:
-        path: /var/www/html
+        path: "{{ nginx_root }}"
         state: directory
         mode: '0755'
 
@@ -178,13 +183,16 @@ vagrant@ansible01:~/inventory$ cat playbook.yml
           <h1>Nginx on Ubuntu!</h1>
           <p>Port: {{ nginx_port }}</p>
           <p>Host: {{ ansible_hostname }}</p>
-        dest: /var/www/html/index.html
+          <p>Root: {{ nginx_root }}</p>
+        dest: "{{ nginx_root }}/index.html"
         mode: '0644'
 
-    - name: Deploy Nginx config
+    - name: Deploy Nginx configuration from template
       template:
-        src: templates/nginx.conf.j2
+        src: "{{ playbook_dir }}/templates/nginx.conf.j2"
         dest: /etc/nginx/nginx.conf
+        owner: root
+        group: root
         mode: '0644'
       notify: Restart Nginx
 
@@ -206,14 +214,22 @@ vagrant@ansible01:~/inventory$ cat playbook.yml
         name: nginx
         state: started
         enabled: yes
-      # Запустим playbook
-      vagrant@ansible01:~/inventory$ ansible-playbook playbook.yml -l nginx
-
-      
-
+    
     - name: Restart Nginx
       systemd:
         name: nginx
+        state: restarted
+      # Запустим playbook
+      vagrant@ansible01:~/inventory$ ansible-playbook playbook.yml -l nginx
+      # Проверка
+      vagrant@ansible01:~/inventory$ curl http://192.168.56.12:8080
+<h1>Nginx on Ubuntu!</h1>
+<p>Port: 8080</p>
+<p>Host: ansible-client</p>
+<p>Root: /var/www/html</p>
+
+
+   
 
 
 
